@@ -16,7 +16,9 @@ A hand-drawn/sketchy "desktop OS" prototype — a personal hobby site styled lik
 
 Every hand-drawn border/shape goes through this file's shared `generator` (a `rough.generator()` instance), `SKETCH_OPTIONS`, `roundedRectPath`/`insetRoundedRectPath`, and the `SketchOverlay` component (the `<svg>` wrapper around `drawablesToPaths`). Reuse these instead of calling `rough.generator()` or writing a rounded-rect path elsewhere.
 
-`SketchOverlay` must keep `preserveAspectRatio="none"`. Several components (e.g. `FloatingWindow`) only recompute their rough paths when a drag/resize *stops*, not on every frame, so mid-interaction the rendered box briefly has a different aspect ratio than the last-committed `viewBox`. Without that attribute the SVG letterboxes instead of stretching, visually detaching the border from the box — this was a real regression once already.
+`SketchOverlay` must keep `preserveAspectRatio="none"`. Its `viewBox` can briefly disagree with the rendered box (a component that recomputes its paths on an interaction *stop* rather than every frame, a CSS-driven size change), and without that attribute the SVG letterboxes instead of stretching, visually detaching the border from the box — this was a real regression once already.
+
+The flip side: a stretched overlay is only safe for shapes whose *whole* geometry should scale with the box. Anything drawn at a fixed pixel offset — `FloatingWindow`'s title-bar divider at `y = TITLE_BAR_HEIGHT` — drifts away from the fixed-height DOM element it's supposed to sit under as soon as the viewBox is stale, so such overlays must track the live box size (see the window manager note below).
 
 ## Clickable sketch tiles (`app/components/PressableSketch.tsx`)
 
@@ -28,7 +30,7 @@ Each app is a folder under `app/apps/<name>/` exporting an `AppDefinition` (`app
 
 ## Desktop shell / window manager (`app/components/Desktop.tsx`, `FloatingWindow.tsx`)
 
-`Desktop.tsx` is a client component (window state can't live in a Server Component) owning `windows: Record<appId, WindowState>` (position/size/z-index/minimized/maximized) and `focusedAppId`. Model is **singleton-per-app**: one window per app; clicking its dock icon again focuses/un-minimizes rather than opening a duplicate. `FloatingWindow.tsx` wraps `react-rnd` for the drag/resize mechanics while keeping our own rough.js chrome as the visual layer; bounds are committed on drag/resize *stop* only (see the `SketchOverlay` note above for why).
+`Desktop.tsx` is a client component (window state can't live in a Server Component) owning `windows: Record<appId, WindowState>` (position/size/z-index/minimized/maximized) and `focusedAppId`. Model is **singleton-per-app**: one window per app; clicking its dock icon again focuses/un-minimizes rather than opening a duplicate. `FloatingWindow.tsx` wraps `react-rnd` for the drag/resize mechanics while keeping our own rough.js chrome as the visual layer. Bounds are committed to `Desktop.tsx` on drag/resize *stop* only, but the chrome itself follows a local `liveSize` updated on every `onResize` frame, so the title-bar divider and corner radii stay pinned mid-resize; `liveSize` is cleared on stop. Feeding the live size back into `Rnd`'s `size` prop is safe — `re-resizable` renders from its own internal state while `isResizing`.
 
 Known gaps, not yet fixed: resizing an unfocused window doesn't bring it to front (react-rnd's resize handles sit outside the div the focus-capture handler is on); shrinking the browser doesn't re-clamp windows that end up partly off-screen.
 

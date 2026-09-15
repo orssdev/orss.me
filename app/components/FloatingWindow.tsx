@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Rnd } from "react-rnd";
 import type { Drawable } from "roughjs/bin/core";
 import type { AppDefinition } from "../apps/types";
-import type { WindowBounds, WindowState } from "./window-manager";
+import type { WindowBounds, WindowSize, WindowState } from "./window-manager";
 import {
   generator,
   insetRoundedRectPath,
@@ -75,7 +75,16 @@ export function FloatingWindow({
   onToggleMaximize: () => void;
   onBoundsChange: (bounds: WindowBounds) => void;
 }) {
-  const { width, height } = state;
+  /**
+   * Live box size while a resize is in flight; null otherwise. The chrome is an
+   * SVG stretched over the window (`preserveAspectRatio="none"`), so a viewBox
+   * that lags the real box scales the title-bar divider away from the fixed
+   * 40px title bar and skews the corner radii. Following the live size keeps
+   * both pinned; committed bounds still only change on resize stop.
+   */
+  const [liveSize, setLiveSize] = useState<WindowSize | null>(null);
+  const width = liveSize?.width ?? state.width;
+  const height = liveSize?.height ?? state.height;
   const Content = app.Content;
   const chrome = useMemo(() => windowChrome(width, height), [width, height]);
 
@@ -92,14 +101,18 @@ export function FloatingWindow({
       enableResizing={!state.isMaximized}
       style={{ zIndex: state.zIndex }}
       onDragStop={(_e, d) => onBoundsChange({ x: d.x, y: d.y, width, height })}
-      onResizeStop={(_e, _direction, ref, _delta, position) =>
+      onResize={(_e, _direction, ref) =>
+        setLiveSize({ width: ref.offsetWidth, height: ref.offsetHeight })
+      }
+      onResizeStop={(_e, _direction, ref, _delta, position) => {
+        setLiveSize(null);
         onBoundsChange({
           x: position.x,
           y: position.y,
           width: ref.offsetWidth,
           height: ref.offsetHeight,
-        })
-      }
+        });
+      }}
     >
       {/* react-rnd doesn't document forwarding onMouseDown to its root, so focus off our own wrapper. */}
       <div
