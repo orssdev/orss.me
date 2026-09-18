@@ -2,9 +2,11 @@
 
 import { Fragment, useState } from "react";
 import type { AppDefinition } from "@/kernel/app-definition";
+import { useInstalledApps } from "@/kernel/installed-apps";
 import { ScribbleDivider } from "@/components/sketch/rough-utils";
 import { rowSeed, ScribbleRow } from "@/components/sketch/ScribbleRow";
 import {
+  applicationEntries,
   HOME_PATH,
   listDirectory,
   pathTrail,
@@ -95,10 +97,11 @@ function Breadcrumb({
 }
 
 function FilesContent() {
+  const apps = useInstalledApps();
   const [path, setPath] = useState(HOME_PATH);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
 
-  const entries = listDirectory(path) ?? [];
+  const entries = listDirectory(path, applicationEntries(apps)) ?? [];
   const trail = pathTrail(path);
 
   function navigate(next: string) {

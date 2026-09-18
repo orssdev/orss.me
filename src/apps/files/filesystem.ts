@@ -1,4 +1,4 @@
-import { apps } from "@/apps/registry";
+import type { AppDefinition } from "@/kernel/app-definition";
 
 /** A listing row: enough to render or navigate to it, nothing app-specific. */
 export type FsEntry =
@@ -50,7 +50,7 @@ const HOME: DirNode = {
         { type: "file", name: "sketch.png" },
       ],
     },
-    // Listed live from the app registry — see applicationEntries below.
+    // Filled in by the caller's `applicationEntries` — see listDirectory below.
     { type: "directory", name: "Applications", children: [] },
   ],
 };
@@ -92,8 +92,12 @@ function findNode(path: string): TreeNode | null {
   return node;
 }
 
-/** /Applications is generated from the live app registry rather than stored in the tree. */
-function applicationEntries(): FsEntry[] {
+/**
+ * /Applications is generated from the installed apps rather than stored in the
+ * tree. The list is passed in rather than imported: the registry imports every
+ * app, so reaching for it from here would point an import back up the layering.
+ */
+export function applicationEntries(apps: AppDefinition[]): FsEntry[] {
   return apps.map((app) => {
     const name = `${app.label}.app`;
     return {
@@ -118,9 +122,12 @@ export function pathTrail(path: string): FsLocation[] {
 }
 
 /** Lists a directory's contents, or null if `path` doesn't exist or isn't a directory. */
-export function listDirectory(path: string): FsEntry[] | null {
+export function listDirectory(
+  path: string,
+  appEntries: FsEntry[],
+): FsEntry[] | null {
   const normalized = normalizePath(path);
-  if (normalized === APPLICATIONS_PATH) return applicationEntries();
+  if (normalized === APPLICATIONS_PATH) return appEntries;
 
   const node = findNode(normalized);
   if (!node || node.type !== "directory") return null;
