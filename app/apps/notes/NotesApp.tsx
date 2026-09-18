@@ -123,4 +123,6 @@ export const notesApp: AppDefinition = {
   glyph: "▤",
   menu: ["File", "Edit", "View", "Window", "Help"],
   Content: NotesContent,
+  defaultSize: "medium",
+  minSize: "medium",
 };

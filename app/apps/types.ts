@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { WindowSizePreset } from "../components/window-manager";
 
 /** Everything the desktop shell needs to list, launch, and chrome an app. */
 export interface AppDefinition {
@@ -10,4 +11,8 @@ export interface AppDefinition {
   menu: string[];
   /** Renders inside AppScreen — fills the space between the menu bar and the dock. */
   Content: ComponentType;
+  /** Size the window opens at. Defaults to `"small"`. */
+  defaultSize?: WindowSizePreset;
+  /** Smallest size the window can be resized down to. Defaults to `"small"`. */
+  minSize?: WindowSizePreset;
 }

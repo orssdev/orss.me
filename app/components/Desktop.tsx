@@ -66,12 +66,15 @@ export function Desktop() {
     (appId: string) => {
       const zIndex = nextZIndex();
       const area = measureScreen() ?? DEFAULT_WINDOW_SIZE;
+      const defaultSize = apps.find((app) => app.id === appId)?.defaultSize;
       setFocusedAppId(appId);
       setWindows((prev) => {
         const win = prev[appId];
         return {
           ...prev,
-          [appId]: win ? raised(win, zIndex) : centeredWindow(area, zIndex),
+          [appId]: win
+            ? raised(win, zIndex)
+            : centeredWindow(area, zIndex, defaultSize),
         };
       });
     },

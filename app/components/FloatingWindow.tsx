@@ -4,7 +4,12 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Rnd } from "react-rnd";
 import type { Drawable } from "roughjs/bin/core";
 import type { AppDefinition } from "../apps/types";
-import type { WindowBounds, WindowSize, WindowState } from "./window-manager";
+import {
+  presetSize,
+  type WindowBounds,
+  type WindowSize,
+  type WindowState,
+} from "./window-manager";
 import {
   generator,
   insetRoundedRectPath,
@@ -14,8 +19,6 @@ import {
 import { CloseGlyph, MaximizeGlyph, MinimizeGlyph } from "./WindowControlGlyphs";
 
 const TITLE_BAR_HEIGHT = 40;
-const MIN_WIDTH = 320;
-const MIN_HEIGHT = 200;
 const WINDOW_RADIUS = 16;
 
 /** Marker classes react-rnd matches on: the title bar drags, the controls don't. */
@@ -89,17 +92,30 @@ export function FloatingWindow({
   const Content = app.Content;
   const chrome = useMemo(() => windowChrome(width, height), [width, height]);
 
+  /**
+   * `minSize: "fullscreen"` has no fixed pixel floor to hand react-rnd — there's
+   * no live screen size here — so it's enforced by pinning the window instead:
+   * `bounds="parent"` already caps growth at the screen, and turning both
+   * gestures off keeps it there, same as `isMaximized` does.
+   */
+  const minSizePreset = app.minSize ?? "small";
+  const isPinned = state.isMaximized || minSizePreset === "fullscreen";
+  const minSize =
+    minSizePreset === "fullscreen"
+      ? { width, height }
+      : presetSize(minSizePreset);
+
   return (
     <Rnd
       size={{ width, height }}
       position={{ x: state.x, y: state.y }}
-      minWidth={MIN_WIDTH}
-      minHeight={MIN_HEIGHT}
+      minWidth={minSize.width}
+      minHeight={minSize.height}
       bounds="parent"
       dragHandleClassName={DRAG_HANDLE_CLASS}
       cancel={`.${CONTROLS_CLASS}`}
-      disableDragging={state.isMaximized}
-      enableResizing={!state.isMaximized}
+      disableDragging={isPinned}
+      enableResizing={!isPinned}
       style={{ zIndex: state.zIndex }}
       onDragStop={(_e, d) => onBoundsChange({ x: d.x, y: d.y, width, height })}
       onResize={(_e, _direction, ref) =>
