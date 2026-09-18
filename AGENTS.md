@@ -24,9 +24,17 @@ Every hand-drawn border/shape goes through this file's shared `generator` (a `ro
 
 The flip side: a stretched overlay is only safe for shapes whose *whole* geometry should scale with the box. Anything drawn at a fixed pixel offset — `FloatingWindow`'s title-bar divider at `y = TITLE_BAR_HEIGHT` — drifts away from the fixed-height DOM element it's supposed to sit under as soon as the viewBox is stale, so such overlays must track the live box size (see the window manager note below).
 
+`rough-utils.tsx` also exports `ScribbleHighlight` (a hachure-filled rough rectangle, stretched like any other overlay — the sketched stand-in for a flat selected/hover background color) and `ScribbleLine`/`ScribbleDivider` (a single wobbly rough line, optionally pre-pinned to one edge of its positioned parent — the stand-in for a straight CSS `border-b`/`border-r`). Nothing in this UI should fall back to a flat Tailwind `bg-zinc-*` highlight or a plain CSS border for something the user selects, hovers, or that structurally divides two panes — draw it with these instead, the same way shapes go through `SketchOverlay` rather than raw SVG.
+
 ## Clickable sketch tiles (`app/components/PressableSketch.tsx`)
 
 The shared primitive for anything clickable in this style: draws a rough outline plus an offset "shadow" copy, lifts on hover and presses onto its own shadow on click/tap — all via CSS transforms, no JS. `SketchButton`, `DockIcon`, `DesktopIcon`, and `ThemeToggle` all build on this. New clickable sketch elements should too, rather than re-implementing the hover/press effect.
+
+## Selectable list rows (`app/components/ScribbleRow.tsx`)
+
+The equivalent shared primitive for a row in a list (a sidebar entry, a file/note listing row): layers a hover `ScribbleHighlight`, a differently-seeded selected `ScribbleHighlight`, and a bottom `ScribbleDivider` behind the row's content. `NoteRow` (Notes) and the sidebar/entry rows (Files) both build on it — new row lists should too, rather than reaching for `bg-zinc-200`/`border-b`. Callers thread in a per-row `seed` via the `rowSeed(base, index)` helper it exports (e.g. `rowSeed(NOTE_SEED_BASE, i)`) so sibling rows don't all draw the identical squiggle, and `contentClassName` when a row's content needs to be laid out as a flex row instead of the default block stack.
+
+One gotcha specific to `ScribbleDivider`: it's `position: absolute`, so if it's placed *inside* a scrolling (`overflow-auto`) container it scrolls away with the content instead of staying pinned to the pane edge. Wrap the scrollable content in its own inner `overflow-auto` div, and put the divider as a sibling of that inner div inside a non-scrolling `relative` outer wrapper (see the sidebar in `NotesApp.tsx` or `FilesApp.tsx`).
 
 ## Apps as features (`app/apps/`)
 

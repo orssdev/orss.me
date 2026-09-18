@@ -89,3 +89,124 @@ export function SketchOverlay({
     </svg>
   );
 }
+
+export type ScribbleOrientation = "horizontal" | "vertical";
+
+/**
+ * Nominal box the highlight's hachure is drawn into. The overlay stretches to
+ * the real row, so these only set how dense and slanted the shading looks.
+ */
+const HIGHLIGHT_WIDTH = 240;
+const HIGHLIGHT_HEIGHT = 36;
+/** Keeps the fill's wobble from being clipped at the viewBox edge. */
+const HIGHLIGHT_INSET = 2;
+
+/**
+ * A hachure-filled rough rectangle, stretched over its positioned parent — the
+ * sketched stand-in for a flat CSS background color on a hover/selected row.
+ * Caller controls color and opacity via `className` (both use `currentColor`).
+ */
+export function ScribbleHighlight({
+  seed,
+  className = "",
+}: {
+  seed: number;
+  className?: string;
+}) {
+  const drawable = generator.rectangle(
+    HIGHLIGHT_INSET,
+    HIGHLIGHT_INSET,
+    HIGHLIGHT_WIDTH - HIGHLIGHT_INSET * 2,
+    HIGHLIGHT_HEIGHT - HIGHLIGHT_INSET * 2,
+    {
+      ...SKETCH_OPTIONS,
+      seed,
+      roughness: 2.4,
+      fill: "currentColor",
+      fillWeight: 1,
+      // Wide gap so this reads as a light wash behind text, not hatching drawn over it.
+      hachureGap: 7,
+      stroke: "none",
+    },
+  );
+  return (
+    <SketchOverlay
+      width={HIGHLIGHT_WIDTH}
+      height={HIGHLIGHT_HEIGHT}
+      drawables={[drawable]}
+      className={className}
+    />
+  );
+}
+
+/** Nominal length of a scribbled line; the overlay stretches it to the real edge. */
+const LINE_LENGTH = 240;
+/** Thickness of the viewBox the line is centred in, so its wobble isn't clipped. */
+const LINE_BOX = 4;
+const LINE_CENTER = LINE_BOX / 2;
+
+/** A hand-drawn stand-in for a straight CSS border — a single wobbly rough line. */
+export function ScribbleLine({
+  seed,
+  orientation = "horizontal",
+  className = "",
+}: {
+  seed: number;
+  orientation?: ScribbleOrientation;
+  className?: string;
+}) {
+  const isHorizontal = orientation === "horizontal";
+  const [width, height] = isHorizontal
+    ? [LINE_LENGTH, LINE_BOX]
+    : [LINE_BOX, LINE_LENGTH];
+  const [x1, y1, x2, y2] = isHorizontal
+    ? [0, LINE_CENTER, LINE_LENGTH, LINE_CENTER]
+    : [LINE_CENTER, 0, LINE_CENTER, LINE_LENGTH];
+  const drawable = generator.line(x1, y1, x2, y2, {
+    ...SKETCH_OPTIONS,
+    seed,
+    roughness: 1.8,
+    strokeWidth: 1.25,
+  });
+
+  return (
+    <SketchOverlay
+      width={width}
+      height={height}
+      drawables={[drawable]}
+      className={className}
+    />
+  );
+}
+
+/**
+ * A `ScribbleLine` pinned to one edge of its positioned parent — the drop-in
+ * replacement for a structural `border-b`/`border-r` divider (a panel split,
+ * a toolbar's bottom edge) elsewhere in this sketch UI.
+ *
+ * The parent must not scroll, or the divider scrolls away with its content —
+ * wrap a scrolling panel in a non-scrolling `relative` element and pin the
+ * divider to that instead.
+ */
+export function ScribbleDivider({
+  seed,
+  orientation = "horizontal",
+  className = "",
+}: {
+  seed: number;
+  orientation?: ScribbleOrientation;
+  className?: string;
+}) {
+  const edge =
+    orientation === "horizontal"
+      ? "inset-x-0 bottom-0 h-1.5"
+      : "inset-y-0 right-0 w-1.5";
+
+  return (
+    <span
+      className={`pointer-events-none absolute ${edge} text-zinc-300 dark:text-zinc-700 ${className}`}
+    >
+      <ScribbleLine seed={seed} orientation={orientation} />
+    </span>
+  );
+}

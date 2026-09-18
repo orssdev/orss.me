@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { ScribbleDivider } from "../../components/rough-utils";
+import { rowSeed, ScribbleRow } from "../../components/ScribbleRow";
 import type { AppDefinition } from "../types";
 import type { Note } from "./lib";
 
@@ -17,12 +19,18 @@ function formatDate(iso: string): string {
   });
 }
 
+/** Arbitrary but distinct seeds, so each sketched element draws its own squiggle. */
+const SIDEBAR_DIVIDER_SEED = 200;
+const NOTE_SEED_BASE = 300;
+
 function NoteRow({
   note,
+  seed,
   isSelected,
   onSelect,
 }: {
   note: Note;
+  seed: number;
   isSelected: boolean;
   onSelect: () => void;
 }) {
@@ -30,20 +38,12 @@ function NoteRow({
   const meta = formattedDate ? `${formattedDate} ${note.preview}` : note.preview;
 
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={`block w-full border-b border-zinc-200 px-4 py-3 text-left dark:border-white/10 ${
-        isSelected
-          ? "bg-zinc-200 dark:bg-white/10"
-          : "hover:bg-zinc-100 dark:hover:bg-white/5"
-      }`}
-    >
+    <ScribbleRow seed={seed} isSelected={isSelected} onClick={onSelect} className="py-3">
       <div className="truncate font-semibold">{note.title}</div>
       <div className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
         {meta}
       </div>
-    </button>
+    </ScribbleRow>
   );
 }
 
@@ -60,10 +60,11 @@ function NoteList({
   if (notes === null) return <div className="p-4 text-zinc-500">Loading…</div>;
   if (notes.length === 0) return <div className="p-4 text-zinc-500">No notes yet.</div>;
 
-  return notes.map((note) => (
+  return notes.map((note, i) => (
     <NoteRow
       key={note.slug}
       note={note}
+      seed={rowSeed(NOTE_SEED_BASE, i)}
       isSelected={note.slug === selectedSlug}
       onSelect={() => onSelect(note.slug)}
     />
@@ -92,12 +93,17 @@ function NotesContent() {
 
   return (
     <div className="flex h-full font-mono text-sm">
-      <div className="w-64 shrink-0 overflow-auto border-r border-zinc-300 dark:border-white/20">
-        <NoteList
-          notes={notes}
-          selectedSlug={selectedSlug}
-          onSelect={setSelectedSlug}
-        />
+      {/* the divider hangs off this non-scrolling wrapper, so it stays pinned
+          to the panel edge instead of scrolling away with the list */}
+      <div className="relative w-64 shrink-0">
+        <div className="h-full overflow-auto">
+          <NoteList
+            notes={notes}
+            selectedSlug={selectedSlug}
+            onSelect={setSelectedSlug}
+          />
+        </div>
+        <ScribbleDivider seed={SIDEBAR_DIVIDER_SEED} orientation="vertical" />
       </div>
       <div className="min-w-0 flex-1 overflow-auto p-6">
         {selected && (
