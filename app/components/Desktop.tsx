@@ -19,6 +19,10 @@ import {
 const SCREEN =
   "h-screen w-full bg-white text-zinc-900 dark:bg-black dark:text-white";
 
+/** Centred "coming soon" notice, for the tiers the desktop UI isn't built for yet. */
+const PLACEHOLDER_SCREEN =
+  `${SCREEN} items-center justify-center px-8 text-center font-mono text-lg`;
+
 export function Desktop() {
   const [windows, setWindows] = useState<Record<string, WindowState>>({});
   const [focusedAppId, setFocusedAppId] = useState<string | null>(null);
@@ -144,7 +148,7 @@ export function Desktop() {
 
   return (
     <>
-      <div className={`${SCREEN} hidden flex-col overflow-hidden sm:flex`}>
+      <div className={`${SCREEN} hidden flex-col overflow-hidden lg:flex`}>
         <MenuBar app={focusedApp} />
         <AppScreen ref={screenRef}>
           {apps.map((app) => {
@@ -167,9 +171,11 @@ export function Desktop() {
         <Dock apps={apps} openAppIds={openAppIds} onSelect={openOrFocus} />
       </div>
 
-      <div
-        className={`${SCREEN} flex items-center justify-center px-8 text-center font-mono text-lg sm:hidden`}
-      >
+      <div className={`${PLACEHOLDER_SCREEN} hidden sm:flex lg:hidden`}>
+        Tablet — coming soon
+      </div>
+
+      <div className={`${PLACEHOLDER_SCREEN} flex sm:hidden`}>
         Mobile — coming soon
       </div>
     </>

@@ -50,9 +50,9 @@ Known gaps, not yet fixed: resizing an unfocused window doesn't bring it to fron
 
 Tailwind's `dark:` variant is class-based (`@custom-variant dark` in `globals.css`), driven by `next-themes` (`ThemeProvider` in `theme-provider.tsx`, wired into `app/layout.tsx` with `suppressHydrationWarning`). For any client-only value that must match between server and first client render (mount state, the live clock in `MenuBarClock.tsx`), use `useSyncExternalStore` rather than `useState` + `useEffect` — the latter trips the `react-hooks/set-state-in-effect` lint rule and this codebase has standardized on the former.
 
-## Mobile
+## Mobile & tablet
 
-Not built yet — below the `sm` breakpoint the whole desktop/window UI is replaced with a static "Mobile — coming soon" placeholder (CSS-only `sm:hidden`/`hidden sm:flex` swap, no JS breakpoint detection).
+Not built yet — the desktop/window UI only renders at `lg` and up. Below that it's two static CSS-only placeholders, no JS breakpoint detection: under `sm`, "Mobile — coming soon"; from `sm` to `lg` (tablet-ish widths), "Tablet — coming soon". All three tiers are mutually exclusive `hidden`/`flex` swaps keyed off the same breakpoints in `Desktop.tsx`.
 
 ## Workflow for new features here
 
