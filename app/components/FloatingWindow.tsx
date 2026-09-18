@@ -28,7 +28,8 @@ function windowChrome(width: number, height: number): Drawable[] {
     generator.path(insetRoundedRectPath(width, height, WINDOW_RADIUS, 2), {
       ...SKETCH_OPTIONS,
       seed: 100,
-      roughness: 1.2,
+      roughness: 3.2,
+      strokeWidth: 1.5,
     }),
     generator.line(2, TITLE_BAR_HEIGHT, width - 2, TITLE_BAR_HEIGHT, {
       ...SKETCH_OPTIONS,

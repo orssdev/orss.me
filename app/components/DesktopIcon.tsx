@@ -13,6 +13,7 @@ export function DesktopIcon({
       width={96}
       height={80}
       radius={6}
+      shadow
       className="flex-col gap-1 font-mono text-xs text-zinc-800 dark:text-zinc-200"
     >
       {label}

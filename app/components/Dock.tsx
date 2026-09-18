@@ -7,10 +7,10 @@ import {
   SketchOverlay,
 } from "./rough-utils";
 
-const GAP = 8;
-const PADDING = 12;
+const GAP = 6;
+const PADDING = 10;
 const HEIGHT = DOCK_ICON_SIZE + PADDING * 2;
-const DOCK_RADIUS = 16;
+const DOCK_RADIUS = 14;
 const STROKE_INSET = 2;
 
 function dockWidth(appCount: number): number {
@@ -22,7 +22,7 @@ function dockWidth(appCount: number): number {
 function DockOutline({ width }: { width: number }) {
   const drawable = generator.path(
     insetRoundedRectPath(width, HEIGHT, DOCK_RADIUS, STROKE_INSET),
-    { ...SKETCH_OPTIONS, seed: 900, roughness: 1.2 },
+    { ...SKETCH_OPTIONS, seed: 900, roughness: 0.6 },
   );
 
   return (

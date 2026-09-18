@@ -33,6 +33,7 @@ export function ThemeToggle() {
       width={64}
       height={28}
       radius={6}
+      shadow
       className="font-mono text-xs text-zinc-800 dark:text-zinc-200"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label="Toggle theme"

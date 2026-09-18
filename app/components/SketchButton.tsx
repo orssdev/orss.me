@@ -5,10 +5,12 @@ export function SketchButton({
   children,
   seed = 5,
   filled = false,
+  shadow = false,
 }: {
   children: ReactNode;
   seed?: number;
   filled?: boolean;
+  shadow?: boolean;
 }) {
   return (
     <PressableSketch
@@ -17,6 +19,7 @@ export function SketchButton({
       height={56}
       radius={8}
       filled={filled}
+      shadow={shadow}
       className="font-mono text-sm font-medium text-zinc-900 select-none dark:text-zinc-50"
     >
       {children}

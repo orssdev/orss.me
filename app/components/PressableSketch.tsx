@@ -20,12 +20,14 @@ function Outline({
   width,
   height,
   radius,
+  roughness,
   filled,
 }: {
   seed: number;
   width: number;
   height: number;
   radius: number;
+  roughness: number;
   filled?: boolean;
 }) {
   const drawable = generator.path(
@@ -33,7 +35,7 @@ function Outline({
     {
       ...SKETCH_OPTIONS,
       seed,
-      roughness: 1.4,
+      roughness,
       ...(filled ? { fill: "currentColor", fillWeight: 0.4 } : {}),
     },
   );
@@ -52,7 +54,9 @@ export function PressableSketch({
   width,
   height,
   radius,
+  roughness = 1.4,
   filled = false,
+  shadow = false,
   className = "",
   children,
   ...buttonProps
@@ -61,7 +65,9 @@ export function PressableSketch({
   width: number;
   height: number;
   radius: number;
+  roughness?: number;
   filled?: boolean;
+  shadow?: boolean;
   className?: string;
   children?: ReactNode;
 } & Omit<
@@ -75,18 +81,23 @@ export function PressableSketch({
       style={{ width, height }}
       {...buttonProps}
     >
-      {/* shadow silhouette: fixed in place, gets covered when the tile presses onto it */}
-      <span
-        className="pointer-events-none absolute inset-0 text-zinc-300 dark:text-zinc-700"
-        style={{ transform: `translate(${PRESS_OFFSET}px, ${PRESS_OFFSET}px)` }}
-      >
-        <Outline
-          seed={seed + SHADOW_SEED_OFFSET}
-          width={width}
-          height={height}
-          radius={radius}
-        />
-      </span>
+      {shadow && (
+        // shadow silhouette: fixed in place, gets covered when the tile presses onto it
+        <span
+          className="pointer-events-none absolute inset-0 text-zinc-300 dark:text-zinc-700"
+          style={{
+            transform: `translate(${PRESS_OFFSET}px, ${PRESS_OFFSET}px)`,
+          }}
+        >
+          <Outline
+            seed={seed + SHADOW_SEED_OFFSET}
+            width={width}
+            height={height}
+            radius={radius}
+            roughness={roughness}
+          />
+        </span>
+      )}
 
       {/* foreground: lifts on hover, presses down onto the shadow on click */}
       <span className={`pointer-events-none absolute inset-0 ${LIFT}`}>
@@ -95,6 +106,7 @@ export function PressableSketch({
           width={width}
           height={height}
           radius={radius}
+          roughness={roughness}
           filled={filled}
         />
       </span>
