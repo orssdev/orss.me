@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import type { AppDefinition } from "@/kernel/app-definition";
 import { ScribbleDivider } from "@/components/sketch/rough-utils";
 import { rowSeed, ScribbleRow } from "@/components/sketch/ScribbleRow";
-import type { Note } from "./lib";
+import type { Note } from "./types";
 
 function formatDate(iso: string): string {
   const date = new Date(iso);

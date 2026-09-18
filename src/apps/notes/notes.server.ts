@@ -1,14 +1,9 @@
+import "server-only";
+
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
-
-export interface Note {
-  slug: string;
-  title: string;
-  date: string;
-  preview: string;
-  content: string;
-}
+import type { Note } from "./types";
 
 const NOTES_DIR = path.join(process.cwd(), "src/apps/notes/content");
 
