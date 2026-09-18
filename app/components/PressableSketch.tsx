@@ -6,14 +6,11 @@ import {
   SketchOverlay,
 } from "./rough-utils";
 
-/** How far the tile drops when pressed. Must match the `group-active:` translate in LIFT. */
+/** Fixed offset of the shadow silhouette behind the tile. */
 const PRESS_OFFSET = 4;
 /** Keeps the shadow outline from being an exact tracing of the foreground one. */
 const SHADOW_SEED_OFFSET = 100;
 const STROKE_INSET = 3;
-
-const LIFT =
-  "transition-transform duration-100 ease-out group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-[4px] group-active:translate-y-[4px]";
 
 function Outline({
   seed,
@@ -46,8 +43,9 @@ function Outline({
 }
 
 /**
- * A rough-sketched tile that lifts on hover and presses onto its own shadow on click.
- * `width` and `height` are both the rendered pixel size and the sketch viewBox.
+ * A rough-sketched, static tile — no hover/press animation. Pass `shadow` for
+ * a fixed offset shadow silhouette behind it. `width` and `height` are both
+ * the rendered pixel size and the sketch viewBox.
  */
 export function PressableSketch({
   seed,
@@ -77,12 +75,11 @@ export function PressableSketch({
   return (
     <button
       type="button"
-      className={`group relative inline-flex items-center justify-center ${className}`}
+      className={`relative inline-flex items-center justify-center ${className}`}
       style={{ width, height }}
       {...buttonProps}
     >
       {shadow && (
-        // shadow silhouette: fixed in place, gets covered when the tile presses onto it
         <span
           className="pointer-events-none absolute inset-0 text-zinc-300 dark:text-zinc-700"
           style={{
@@ -99,8 +96,7 @@ export function PressableSketch({
         </span>
       )}
 
-      {/* foreground: lifts on hover, presses down onto the shadow on click */}
-      <span className={`pointer-events-none absolute inset-0 ${LIFT}`}>
+      <span className="pointer-events-none absolute inset-0">
         <Outline
           seed={seed}
           width={width}
@@ -110,7 +106,7 @@ export function PressableSketch({
           filled={filled}
         />
       </span>
-      <span className={`relative ${LIFT}`}>{children}</span>
+      <span className="relative">{children}</span>
     </button>
   );
 }
