@@ -12,6 +12,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 A hand-drawn/sketchy "desktop OS" prototype — a personal hobby site styled like a pencil sketch, with a menu bar, a dock, and apps that open as draggable/resizable floating windows. Stack: Next.js (App Router) + React + TypeScript + Tailwind v4, `roughjs` for the hand-drawn rendering, `react-rnd` for window drag/resize, `next-themes` for light/dark.
 
+## Typography
+
+The mono face is Monaspace Radon (Nerd Font patched) — a handwriting-styled monospace chosen deliberately for the sketch vibe, and Nerd-Font-patched so a future Terminal app can render icon glyphs. Self-hosted via `next/font/local` in `app/layout.tsx` (files under `app/fonts/`, license at `app/fonts/LICENSE.txt`), exposed as the CSS custom property `--font-radon`, which `globals.css` maps to Tailwind's `--font-mono` — so it's just `font-mono`, same as before. Don't reach for a Google Font or another local mono face here without deliberately revisiting this choice; it's load-bearing for the whole UI's identity, not an incidental pick. `Geist` (sans) is unrelated leftover boilerplate — nothing in the app opts into `font-sans`.
+
 ## Sketch rendering (`app/components/rough-utils.tsx`)
 
 Every hand-drawn border/shape goes through this file's shared `generator` (a `rough.generator()` instance), `SKETCH_OPTIONS`, `roundedRectPath`/`insetRoundedRectPath`, and the `SketchOverlay` component (the `<svg>` wrapper around `drawablesToPaths`). Reuse these instead of calling `rough.generator()` or writing a rounded-rect path elsewhere.
