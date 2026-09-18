@@ -1,7 +1,15 @@
 import type { AppDefinition } from "../apps/types";
 import { ThemeToggle } from "./ThemeToggle";
 import { MenuBarClock } from "./MenuBarClock";
-import { generator, SKETCH_OPTIONS, drawablesToPaths } from "./rough-utils";
+import {
+  generator,
+  SKETCH_OPTIONS,
+  drawablesToPaths,
+  ScribbleDivider,
+} from "./rough-utils";
+
+/** Arbitrary seed, so this divider draws its own squiggle. */
+const MENU_BAR_DIVIDER_SEED = 40;
 
 /** Stand-in for a system/desktop icon in the menu bar's app-name slot. */
 function DesktopGlyph() {
@@ -16,7 +24,7 @@ function DesktopGlyph() {
 
 export function MenuBar({ app }: { app: AppDefinition | null }) {
   return (
-    <div className="flex h-9 shrink-0 items-center justify-between border-b border-zinc-300 px-4 font-mono text-sm dark:border-white/20">
+    <div className="relative flex h-9 shrink-0 items-center justify-between px-4 font-mono text-sm">
       <div className="flex items-center gap-5">
         <span className="flex items-center gap-1.5 font-semibold">
           <DesktopGlyph />
@@ -27,6 +35,7 @@ export function MenuBar({ app }: { app: AppDefinition | null }) {
         <ThemeToggle />
         <MenuBarClock />
       </div>
+      <ScribbleDivider seed={MENU_BAR_DIVIDER_SEED} />
     </div>
   );
 }
